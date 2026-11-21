@@ -26,7 +26,7 @@ sealed interface NotificationPoll {
     data class Changed(val profileIds: Set<String>) : NotificationPoll
     /** First poll after sign-in (or no notification endpoint): revalidate every profile once. */
     data object Baseline : NotificationPoll
-    data class Failed(val error: ApiError?) : NotificationPoll
+    data class Failed(val error: ApiError?, val failures: Int = 0, val nextAttemptAt: Long = 0) : NotificationPoll
     data class SignedOut(val revoked: Boolean) : NotificationPoll
     data object UpdateRequired : NotificationPoll
 }
@@ -37,8 +37,18 @@ data class SyncSummary(
     val updateRequired: Boolean = false,
     val newFeedItems: Int = 0,
     val requests: Int = 0,
+    /** The notification poll's error, when its request failed in this run. */
+    val pollError: ApiError? = null,
+    /** Consecutive failed notification polls, including this run's. */
+    val pollFailures: Int = 0,
+    val pollRetryAt: Long = 0,
 ) {
-    val failed: Boolean get() = outcomes.values.any { it is SyncOutcome.Failed }
+    val failed: Boolean get() = pollError != null || outcomes.values.any { it is SyncOutcome.Failed }
+
+    /** Network failures and 5xx replies: the server may be down or may have moved to a new address. */
+    val transportErrors: List<ApiError>
+        get() = (listOfNotNull(pollError) + outcomes.values.filterIsInstance<SyncOutcome.Failed>().map { it.error })
+            .filter { it.isNetwork || (it.httpStatus ?: 0) >= 500 }
 }
 
 /**
@@ -209,8 +219,8 @@ class SyncEngine(
                         e.isUpdateRequired -> NotificationPoll.UpdateRequired
                         e.isNotFound -> NotificationPoll.Baseline
                         else -> {
-                            fail(state, e, at)
-                            NotificationPoll.Failed(e)
+                            val failed = fail(state, e, at) as? SyncOutcome.Failed
+                            NotificationPoll.Failed(e, state.failureCount + 1, failed?.nextAttemptAt ?: 0)
                         }
                     }
                 }
@@ -288,16 +298,21 @@ class SyncEngine(
             else -> Unit
         }
         val known = records.profiles().map { it.id }
-        val targets: Collection<String> = when (val poll = pollNotifications()) {
+        var poll: NotificationPoll.Failed? = null
+        val targets: Collection<String> = when (val p = pollNotifications()) {
             NotificationPoll.Baseline -> known
-            NotificationPoll.Unchanged, is NotificationPoll.Failed -> if (force) known else emptyList()
+            NotificationPoll.Unchanged -> if (force) known else emptyList()
+            is NotificationPoll.Failed -> {
+                poll = p
+                if (force) known else emptyList()
+            }
             is NotificationPoll.Changed -> {
-                if (poll.profileIds.any { it !in known }) refreshProfiles(force = true)
+                if (p.profileIds.any { it !in known }) refreshProfiles(force = true)
                 val refreshed = records.profiles().map { it.id }
-                if (force) refreshed else poll.profileIds.filter { it in refreshed }
+                if (force) refreshed else p.profileIds.filter { it in refreshed }
             }
             is NotificationPoll.SignedOut ->
-                return SyncSummary(emptyMap(), SyncOutcome.SignedOut(poll.revoked), requests = requestCount - before)
+                return SyncSummary(emptyMap(), SyncOutcome.SignedOut(p.revoked), requests = requestCount - before)
             NotificationPoll.UpdateRequired ->
                 return SyncSummary(emptyMap(), updateRequired = true, requests = requestCount - before)
         }
@@ -314,7 +329,23 @@ class SyncEngine(
             }
         }
         flushAcks()
-        return SyncSummary(outcomes, null, false, newItems, requestCount - before)
+        return SyncSummary(
+            outcomes, null, false, newItems, requestCount - before,
+            pollError = poll?.error, pollFailures = poll?.failures ?: 0, pollRetryAt = poll?.nextAttemptAt ?: 0,
+        )
+    }
+
+    /**
+     * Clears backoff left by network and server errors once the app has switched to a newly
+     * discovered server address. Waits the server asked for (429 / Retry-After) are kept.
+     */
+    suspend fun clearTransportBackoff() {
+        val dao = db.sync()
+        for (s in dao.all()) {
+            if (s.failureCount > 0 && s.lastErrorCode != RATE_LIMITED) {
+                dao.upsert(s.copy(failureCount = 0, nextAttemptAt = 0, lastErrorCode = null))
+            }
+        }
     }
 
     /** Fetches one document's detail when the viewer needs it (for example a version missing locally). */

@@ -26,6 +26,9 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 
+/** Minimum time between two failure-driven re-reads of the discovery document. */
+private const val REDISCOVERY_INTERVAL_MS = 5 * 60_000L
+
 enum class ServerStatus { UNKNOWN, CHECKING, ONLINE, OFFLINE, UNREACHABLE, UPDATE_REQUIRED }
 
 enum class ServerSource { NONE, MANUAL, LAST_GOOD, DISCOVERY }
@@ -128,6 +131,26 @@ class ServerDirectory(
             }
         }
         publish(ServerStatus.UNREACHABLE, s.lastGoodRoot?.toHttpUrlOrNull(), ServerSource.NONE, discoveryUrl, discovery?.message)
+    }
+
+    @Volatile
+    private var lastRediscoveryAt: Long? = null
+
+    /**
+     * Re-reads the server address after repeated network or 5xx failures. The demo tunnel's address
+     * changes whenever it restarts and the discovery document follows within minutes, so a running
+     * app must not keep calling a dead address until its next launch. Runs at most once every five
+     * minutes; a manual address is re-checked but never replaced. Returns true when a different
+     * server is now in use and answered GET /meta.
+     */
+    suspend fun rediscoverAfterFailure(): Boolean {
+        val now = clock.now().toEpochMilli()
+        lastRediscoveryAt?.let { if (now - it < REDISCOVERY_INTERVAL_MS) return false }
+        lastRediscoveryAt = now
+        val before = root()?.toString()
+        val state = refresh()
+        return state.status == ServerStatus.ONLINE && state.source != ServerSource.MANUAL &&
+            state.root != null && state.root != before
     }
 
     /** Marks the app as too old after any 426 APP_UPDATE_REQUIRED response. */

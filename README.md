@@ -31,10 +31,11 @@ the one the doctor app wrote, unchanged):
 
 ## Install the test APK
 
-1. Download `samford-patient-v0.1.0.apk` and `samford-patient-v0.1.0.apk.sha256` from the
-   [v0.1.0 release](https://github.com/shivam098/samford-patient-android/releases/tag/v0.1.0).
-2. Recommended: check the file. Windows: `certutil -hashfile samford-patient-v0.1.0.apk SHA256`;
-   Linux/macOS: `sha256sum samford-patient-v0.1.0.apk`. It must match the `.sha256` file.
+1. Download `samford-patient-v<version>.apk` and its `.sha256` file from the
+   [latest release](https://github.com/shivam098/samford-patient-android/releases/latest)
+   (currently v0.1.1; v0.1.0 stays available).
+2. Recommended: check the file. Windows: `certutil -hashfile samford-patient-v0.1.1.apk SHA256`;
+   Linux/macOS: `sha256sum samford-patient-v0.1.1.apk`. It must match the `.sha256` file.
 3. On the phone (Android 8.0 or newer), open the APK and allow "Install unknown apps" for your
    browser or Files app when asked.
 4. Open **Samford Patient**. Either sign in (needs the demo server online) or tap
@@ -75,11 +76,16 @@ The app finds the hospital server in this order:
    `https://gist.githubusercontent.com/shivam098/a4237b7aa37de0c876d5c08a3c250d52/raw/samford-endpoint.json`
    (`apiBaseUrl` changes when the demo tunnel restarts; `status` can be `offline`).
 
-Each candidate is checked with `GET {apiBaseUrl}/meta` first. In Settings → Server settings you can
+Each candidate is checked with `GET {apiBaseUrl}/meta` first. The address is looked up at launch and
+again after two failed syncs in a row (network error or 5xx, at most every five minutes), so the app
+follows a restarted tunnel without being reopened. In Settings → Server settings you can
 type an address, **scan a server QR code**, open a `samfordpatient://connect?api=<url>` link with the
 phone camera (it opens the screen pre-filled for you to confirm), or change the discovery page.
 Release builds require HTTPS, except `localhost`, `127.0.0.1` and the emulator's `10.0.2.2` for
 local testing.
+
+The hospital desks and the web patient portal (browser, not this app) are at
+<https://shivam098.github.io/samford/>, a permanent link that forwards to the current tunnel.
 
 To test against your own isolated backend:
 

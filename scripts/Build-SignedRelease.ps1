@@ -47,7 +47,9 @@ $buildTools = Get-ChildItem (Join-Path $env:ANDROID_HOME 'build-tools') | Sort-O
 if ($LASTEXITCODE -ne 0) { throw 'apksigner verification failed' }
 
 $hash = (Get-FileHash $apk -Algorithm SHA256).Hash.ToLowerInvariant()
-$name = 'samford-patient-v0.1.0.apk'
+$versionName = [regex]::Match((Get-Content (Join-Path $repo 'app\build.gradle.kts') -Raw), 'versionName = "([^"]+)"').Groups[1].Value
+if (-not $versionName) { throw 'versionName not found in app/build.gradle.kts' }
+$name = "samford-patient-v$versionName.apk"
 if ($OutputDirectory) {
     New-Item -ItemType Directory -Force $OutputDirectory | Out-Null
     Copy-Item $apk (Join-Path $OutputDirectory $name) -Force

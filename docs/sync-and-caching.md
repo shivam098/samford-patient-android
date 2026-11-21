@@ -134,6 +134,16 @@ Every candidate is validated with `GET {apiBaseUrl}/meta` before use, because ra
 cached for minutes. `status: offline|maintenance` and the operator message are shown; a
 `minPatientAppVersion` above this app's versionCode shows "Update needed".
 
+The address is resolved at launch and again **after repeated failures**: the public demo runs behind
+a tunnel whose address changes on every restart, and the discovery document follows within minutes.
+When two consecutive notification polls fail with a network error or a 5xx reply (or a manual refresh
+fails that way), `SyncCoordinator` asks `ServerDirectory.rediscoverAfterFailure()` to repeat the order
+above, at most once every five minutes. If a different server answers `/meta`, the old address's
+backoff is cleared and the sync is retried once at the new address; cursors and ETags stay valid
+because the backend behind the tunnel is the same. A manual address is re-checked but never replaced.
+Cost: one discovery GET plus one or two `/meta` probes per phone per five minutes, and only while
+syncs are failing.
+
 QR codes and links accepted in Settings → Server settings, or with the phone camera:
 `samfordpatient://connect?api=<url>` or `?discovery=<url>`, a JSON object with `apiBaseUrl`, a
 discovery URL ending in `.json`, or a plain server address. A scanned link only pre-fills the address;

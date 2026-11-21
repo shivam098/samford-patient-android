@@ -136,6 +136,7 @@ class AppContainer(
         },
         clock = clock,
         onUpdateRequired = { serverDirectory.reportUpdateRequired() },
+        rediscover = if (apiOverride == null) ({ serverDirectory.rediscoverAfterFailure() }) else null,
     )
 
     val prefetcher = Prefetcher(database, blobStore, settings, tokens, clock)

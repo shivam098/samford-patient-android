@@ -45,6 +45,11 @@ class SyncCoordinator(
     private val scheduling: SyncScheduling?,
     private val clock: Clock,
     private val onUpdateRequired: () -> Unit = {},
+    /**
+     * Re-reads the server address after repeated network or 5xx failures (the demo tunnel's address
+     * changes when it restarts); returns true when a different, reachable server is now in use.
+     */
+    private val rediscover: (suspend () -> Boolean)? = null,
 ) {
     private val mutex = Mutex()
     private val _status = MutableStateFlow(SyncStatus())
@@ -61,18 +66,28 @@ class SyncCoordinator(
         return mutex.withLock {
             _status.update { it.copy(running = true) }
             try {
-                val summary = engine.syncAll(force = force)
+                var summary = engine.syncAll(force = force)
+                if (summary.signedOut == null && summary.transportErrors.isNotEmpty() &&
+                    (force || summary.pollFailures >= REDISCOVER_AFTER_FAILURES) && rediscover?.invoke() == true
+                ) {
+                    // The server moved: drop the old address's backoff and retry once at the new one.
+                    engine.clearTransportBackoff()
+                    summary = engine.syncAll(force = force)
+                }
                 summary.signedOut?.let { session.onServerSignedOut(it.revoked) }
                 if (summary.updateRequired) onUpdateRequired()
                 if (summary.signedOut == null) {
                     if (reason == "background") notifier?.notifyPending(db.records(), current.notificationsEnabled)
                     else db.records().markAllNotified()
                     val now = clock.now().toEpochMilli()
-                    summary.outcomes.values.filterIsInstance<SyncOutcome.Failed>().minOfOrNull { it.nextAttemptAt }
+                    (summary.outcomes.values.filterIsInstance<SyncOutcome.Failed>().map { it.nextAttemptAt } +
+                        listOf(summary.pollRetryAt).filter { it > 0 })
+                        .minOrNull()
                         ?.let { scheduling?.scheduleRetry(it, now) }
                     if (summary.newFeedItems > 0 && current.autoDownloadOnWifi) scheduling?.schedulePrefetch()
                 }
-                val error = summary.outcomes.values.filterIsInstance<SyncOutcome.Failed>().firstOrNull()?.error?.code
+                val error = summary.pollError?.code
+                    ?: summary.outcomes.values.filterIsInstance<SyncOutcome.Failed>().firstOrNull()?.error?.code
                 _status.value = SyncStatus(running = false, lastErrorCode = error, lastRunAt = clock.now().toEpochMilli())
                 summary
             } catch (e: Exception) {
@@ -81,6 +96,11 @@ class SyncCoordinator(
                 null
             }
         }
+    }
+
+    private companion object {
+        /** Consecutive failed polls before the server address is re-read (one failure may be a blip). */
+        const val REDISCOVER_AFTER_FAILURES = 2
     }
 }
 

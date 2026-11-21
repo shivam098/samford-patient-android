@@ -8,6 +8,7 @@ import com.samford.patient.core.discovery.ServerDirectory
 import com.samford.patient.core.discovery.ServerSource
 import com.samford.patient.core.discovery.ServerStatus
 import com.samford.patient.core.settings.SettingsStore
+import com.samford.patient.testing.MutableClock
 import java.io.File
 import java.nio.file.Files
 import kotlinx.coroutines.CoroutineScope
@@ -118,6 +119,37 @@ class ServerDirectoryTest {
         assertThat(state.source).isEqualTo(ServerSource.MANUAL)
         assertThat(state.status).isEqualTo(ServerStatus.UNREACHABLE)
         assertThat(state.root).isEqualTo(server.url("/api/mobile/v1/").toString())
+        assertThat(dir.rediscoverAfterFailure()).isFalse()
+        assertThat(dir.root().toString()).isEqualTo(server.url("/api/mobile/v1/").toString())
+    }
+
+    @Test
+    fun aMovedServerIsRediscoveredAfterFailuresAtMostEveryFiveMinutes() = runTest {
+        val old = MockWebServer().apply { start() }
+        val oldRoot = old.url("/api/mobile/v1/").toString()
+        old.close() // the previous tunnel address is gone
+        settings.setLastGoodRoot(oldRoot)
+        discovery("online", server.url("/api/mobile/v1").toString())
+        val clock = MutableClock()
+        val dir = ServerDirectory(settings, OkHttpClient(), server.url("/discovery.json").toString(), 1, true, clock)
+        assertThat(dir.root().toString()).isEqualTo(oldRoot)
+
+        assertThat(dir.rediscoverAfterFailure()).isTrue()
+        val newRoot = server.url("/api/mobile/v1/").toString()
+        assertThat(dir.root().toString()).isEqualTo(newRoot)
+        assertThat(settings.current().lastGoodRoot).isEqualTo(newRoot)
+
+        // Further failures within five minutes do not re-read discovery.
+        val requests = server.requestCount
+        clock.advanceSeconds(60)
+        assertThat(dir.rediscoverAfterFailure()).isFalse()
+        assertThat(server.requestCount).isEqualTo(requests)
+
+        // Later, the same server still answers: checked again, nothing changes.
+        clock.advanceSeconds(300)
+        assertThat(dir.rediscoverAfterFailure()).isFalse()
+        assertThat(server.requestCount).isGreaterThan(requests)
+        assertThat(dir.root().toString()).isEqualTo(newRoot)
     }
 
     @Test

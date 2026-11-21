@@ -1,4 +1,4 @@
-# Validation report — Samford Patient v0.1.0
+# Validation report — Samford Patient v0.1.1 (and v0.1.0)
 
 Evidence only; anything not run is listed under "Not verified". Environment for local runs:
 Windows 11, JDK 21.0.13 (Microsoft build), Android SDK platform 37 (build-tools 37.0.0),
@@ -15,7 +15,7 @@ Gradle 9.9.2, AGP 9.5.2, Kotlin 2.4.21. Date: 2026-11-21 (IST).
 ## 2. Unit, Robolectric and Compose UI tests (local)
 
 `gradlew :app:lintDebug :app:testDebugUnitTest :app:assembleRelease` (and `:app:recordRoborazziDebug`,
-which runs the same tests and writes screenshots): **71 tests, 0 failures, 7 skipped** (the 7 backend
+which runs the same tests and writes screenshots): **74 tests, 0 failures, 7 skipped** (the 7 backend
 and cross-app tests skip without a backend; see §3 and §4).
 
 | Suite | Tests | Covers |
@@ -26,7 +26,8 @@ and cross-app tests skip without a backend; see §3 and §4).
 | `SessionAndAuthTest` | 7 | sign-in stores token and family profiles; **the first adult profile opens even when a child is listed first, and re-sign-in keeps the last chosen profile**; wrong code shows attempts left; **sign-out wipes records, versions, pages, Home items, acks, sync state, blob index, page files, share PDFs, app lock and token, keeping server address**; a different mobile on the same phone never sees the previous records; sample mode replaced on sign-in; revoked device wipes, expired token keeps records readable |
 | `NotifierTest` | 2 | notification text is generic ("2 new updates": no names, doctors, tests or medicines), private visibility with a public lock-screen version, each item notified once; with notifications off, items are marked without posting |
 | `HttpMobileApiTest` | 9 | Bearer + `X-Device-Id` + `X-Samford-App(-Version)` + If-None-Match, no cookies; 304; `Idempotency-Key` on POSTs and exact contract bodies; error envelope, `Retry-After`, `attemptsRemaining`, `DEVICE_SIGNED_OUT`; non-JSON 503; network failure; signed-out calls not sent; blob path only for valid hashes; API root normalisation; HTTP-date Retry-After |
-| `ServerDirectoryTest` | 7 | discovery validated with `/meta` and remembered; last-good tried first; offline discovery message; update-required from discovery and `/meta`; manual override never silently replaced; release refuses plain HTTP to LAN hosts; QR payload formats |
+| `ServerDirectoryTest` | 8 | discovery validated with `/meta` and remembered; last-good tried first; offline discovery message; update-required from discovery and `/meta`; manual override never silently replaced (also by failure-driven rediscovery); **a dead last-good address is replaced by the rediscovered one, at most once per five minutes**; release refuses plain HTTP to LAN hosts; QR payload formats |
+| `SyncCoordinatorTest` | 2 | one network failure keeps the address; the second consecutive one re-reads discovery, clears the old backoff and retries once successfully; 4xx errors never trigger rediscovery; an unmoved server keeps the backoff and the plain-language error code |
 | `AppLockTest` | 3 | PIN stored only as salted PBKDF2 hash; lock on launch and after 30 s; five wrong PINs pause entry |
 | `PatientJourneyTest` (UI) | 6 | sign-in with demo code → Home → Records with "Sent to Samford OPD Pharmacy"; unregistered mobile and wrong code explained in plain language; sample mode: amended banner with reason, version 1 via history, back to latest; family profile switch shows only that person's visits; sign-out returns to Welcome with an empty database and cache; app lock hides records until the PIN |
 | `ScreenshotTest` (UI) | 7 | 27 screenshots: phone (411×891 dp) and small phone (320×640 dp), English and Hindi, 1.5× large text, sign-in with demo code, lab result, settings |
