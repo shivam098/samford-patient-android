@@ -32,6 +32,8 @@ jobs:
           distribution: temurin
           java-version: "21"
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - name: Install Android 17 platform
         run: sdkmanager --install "platforms;android-37.0" "build-tools;37.0.0" || echo "AGP will download missing SDK packages"
       - uses: gradle/actions/setup-gradle@v4
@@ -68,6 +70,8 @@ jobs:
           distribution: temurin
           java-version: "21"
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - name: Install Android 17 platform
         run: sdkmanager --install "platforms;android-37.0" "build-tools;37.0.0" || echo "AGP will download missing SDK packages"
       - uses: gradle/actions/setup-gradle@v4
@@ -116,6 +120,8 @@ jobs:
           distribution: temurin
           java-version: "21"
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - name: Install Android 17 platform
         run: sdkmanager --install "platforms;android-37.0" "build-tools;37.0.0" || echo "AGP will download missing SDK packages"
       - uses: gradle/actions/setup-gradle@v4

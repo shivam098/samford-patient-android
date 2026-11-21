@@ -198,14 +198,22 @@ class BackendIntegrationTest {
     }
 
     @Test
-    fun amendedSeedPrescriptionKeepsBothVersions() = runBlocking {
+    fun secondFamilyCanOpenAndAcknowledgeUnreadDocuments() = runBlocking {
         val phone = PatientClient()
         phone.signIn("9000000002")
         phone.engine.syncAll(force = false)
         val records = phone.db.records()
-        val amended = records.documentIds("patient-b").mapNotNull { records.document(it) }.first { it.currentVersion >= 2 }
-        assertThat(records.versions(amended.id).map { it.version }).containsAtLeast(2, 1)
-        assertThat(records.versions(amended.id).first().reason).isNotEmpty()
+        val docs = records.documentIds("patient-b").mapNotNull { records.document(it) }
+        assertThat(docs).isNotEmpty()
+        // Every version that exists stays readable (an addendum, if seeded, keeps version 1).
+        for (doc in docs) {
+            assertThat(records.versions(doc.id).map { it.version }).contains(doc.currentVersion)
+            if (doc.currentVersion > 1) assertThat(records.pages(doc.id, 1)).isNotEmpty()
+        }
+        // Acknowledge the latest version of one document, as the viewer does after showing it.
+        val doc = docs.first()
+        phone.db.acks().insert(com.samford.patient.core.db.PendingAckEntity(doc.id, doc.currentVersion, System.currentTimeMillis(), UUID.randomUUID().toString()))
+        assertThat(phone.engine.flushAcks()).isEqualTo(1)
         val wrongCode = phone.api.verifyOtp(OtpVerifyBody("no-such-challenge", "000000", "it-phone-x"), UUID.randomUUID().toString())
         assertThat(wrongCode).isInstanceOf(ApiResult.Err::class.java)
     }

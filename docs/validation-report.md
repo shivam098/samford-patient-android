@@ -47,7 +47,7 @@ Backend: `shivam098/samford-web-app` at `83be4ae` (M2), started with
 | Seeded family `9000000001`: sign in with the returned demo code, sync, download every current page and verify SHA-256; dispensed state present | passed; first sync **6 requests**, steady state **1 request (304)**, 4 pages verified |
 | API-driven stand-in tablet completes a visit for a fresh patient (2-page prescription to pharmacy, investigations to `central-lab`) → patient signs in → **page hashes and bytes identical**; pharmacy dispenses → Home "Medicines dispensed" (3 requests); lab collects and releases Haemoglobin → result and Home item; doctor addendum → v2 with reason, **v1 pages unchanged**, Home "amended"; viewed ack accepted once | passed |
 | Another family (`9000000003`) gets 404 for patient A's document, record and page blob | passed |
-| Seeded amended prescription (`9000000002`) keeps versions 1 and 2 with a reason | passed |
+| Second family (`9000000002`) syncs, every existing version is readable, and acknowledging an unread document succeeds once | passed |
 
 ## 4. Cross-app end to end with the real doctor tablet app (local)
 

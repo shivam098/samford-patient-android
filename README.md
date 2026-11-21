@@ -41,9 +41,12 @@ labelled **DEMO CODE**. Tap *Use demo code*, then *Verify and sign in*.
 
 | Demo mobile | What you will see |
 |---|---|
-| `9000000001` | Demo patient A and Demo child A (switch between them from the name at the top): an earlier handwritten visit with a visit summary, a dispensed prescription and a lab result |
-| `9000000002` | Demo patient B: a prescription amended to version 2 (the original stays viewable) |
+| `9000000001` | Demo patient A and Demo child A (switch between them from the name at the top): an earlier handwritten visit with a visit summary, a dispensed prescription, investigations and a released Haemoglobin result |
+| `9000000002` | Demo patient B: an earlier handwritten visit (summary, dispensed prescription, investigations with a fasting glucose result) that has not been opened yet |
 | `9000000003` | Demo patient C |
+
+Amendments: the offline sample records include a prescription amended to version 2, with the
+original still viewable from version history.
 
 The server's limits apply: one code per 30 s, 3 per 10 minutes; three wrong codes lock that mobile
 for 30 minutes. The app explains each case in plain English or Hindi.
