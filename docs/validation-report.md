@@ -117,6 +117,20 @@ v2 + v3 verified by `apksigner`, SHA-256
 `e6b7b9751ec25ddf52d5c906aa875bffb697b01d6353129f130c6a68d5559525`. The asset downloaded back from the
 public release page has the same SHA-256.
 
+**Release v0.1.1** (latest; built locally from `56ccf93`, same key, so it installs over v0.1.0):
+`samford-patient-v0.1.1.apk`, 2.45 MB, versionCode 2, v2 + v3 verified, signer certificate SHA-256
+`ea17d2a4…d6d89cd8` identical to v0.1.0, APK SHA-256
+`39bae06ab07aeff6f43709a640c17a12b87160f07ab3b0f194e27d22a1fd84ea` (matches the public download).
+CI run [44871912725](https://github.com/shivam098/samford-patient-android/actions/runs/44871912725) on
+`56ccf93`: all three jobs passed (74 unit/UI tests; backend, stand-in and real doctor-app E2E; emulator).
+v0.1.1 adds failure-driven server rediscovery (the demo tunnel's address changes on restart; see
+[sync-and-caching.md](sync-and-caching.md#server-discovery)). Covered by `ServerDirectoryTest` and
+`SyncCoordinatorTest`, and checked once live: with the previous tunnel address (which no longer
+resolves) as the last good server, `rediscoverAfterFailure()` returned the current
+`cope-seekers-respective-diary.trycloudflare.com` address from the real discovery document after
+`/meta` answered. While building v0.1.1, CI also caught a UI-test race (the records list appeared
+before its cards); the tests now wait for the cards.
+
 | Job | Result |
 |---|---|
 | Lint, unit/UI tests, APKs, screenshots (ubuntu) | passed: lint 0 errors; **71 tests, 0 failures, 7 skipped** (backend tests run in the next job); debug and unsigned release APKs; Roborazzi screenshots uploaded |
