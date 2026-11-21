@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A folded page with a pen stroke and a small cross: the paperless OPD record. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M36,28 L64,28 L74,38 L74,80 L36,80 Z" />
+    <path
+        android:fillColor="#B3E5E0"
+        android:pathData="M64,28 L64,38 L74,38 Z" />
+    <path
+        android:strokeColor="#0B5D73"
+        android:strokeWidth="2.6"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M42,52 C46,46 49,58 53,51 C56,46 58,57 62,52 C64,49 66,53 68,52" />
+    <path
+        android:strokeColor="#0B5D73"
+        android:strokeWidth="2.2"
+        android:strokeLineCap="round"
+        android:pathData="M42,62 L62,62 M42,69 L56,69" />
+    <path
+        android:fillColor="#E0533D"
+        android:pathData="M45,36 h4 v-4 h4 v4 h4 v4 h-4 v4 h-4 v-4 h-4 Z" />
+</vector>

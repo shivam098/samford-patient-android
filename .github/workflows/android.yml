@@ -1,0 +1,154 @@
+name: Android CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Shared synthetic mock backend (shivam098/samford-web-app), pinned to the M2 mobile API.
+  SAMFORD_BACKEND_SHA: 83be4ae028d9f995cd96cbdf00b430ea61bc3795
+  SAMFORD_BACKEND_PORT: "4321"
+  # Doctor tablet app commit whose real sync code produces the cross-app E2E handoff.
+  SAMFORD_DOCTOR_SHA: 2cbc7a533d740b10be22a020f106a46a8998e51d
+
+jobs:
+  build-test:
+    name: Lint, unit/UI tests, APKs, screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: android-actions/setup-android@v3
+      - name: Install Android 17 platform
+        run: sdkmanager --install "platforms;android-37.0" "build-tools;37.0.0" || echo "AGP will download missing SDK packages"
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Lint, unit tests, Robolectric UI tests, debug and release APKs
+        run: ./gradlew --no-daemon :app:lintDebug :app:testDebugUnitTest :app:assembleDebug :app:assembleRelease :baselineprofile:assemble :app:printApkSizes
+      - name: Record Roborazzi screenshots (phone, small phone, Hindi, large text)
+        run: ./gradlew --no-daemon :app:recordRoborazziDebug
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apks-unsigned
+          path: app/build/outputs/apk/**/*.apk
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: reports
+          path: |
+            app/build/reports/
+            app/build/test-results/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: roborazzi-screenshots
+          path: docs/screenshots/
+
+  backend-integration:
+    name: Real mock backend integration and cross-app E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: android-actions/setup-android@v3
+      - name: Install Android 17 platform
+        run: sdkmanager --install "platforms;android-37.0" "build-tools;37.0.0" || echo "AGP will download missing SDK packages"
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Start isolated Samford backend
+        run: scripts/start-isolated-backend.sh
+      - name: Backend integration tests
+        run: ./gradlew --no-daemon :app:testDebugUnitTest --tests 'com.samford.patient.integration.BackendIntegrationTest' "-Psamford.itBase=http://127.0.0.1:${SAMFORD_BACKEND_PORT}"
+      - name: Cross-app E2E with the stand-in tablet (API-driven)
+        run: |
+          ./gradlew --no-daemon :app:testDebugUnitTest --tests 'com.samford.patient.integration.StandInTabletHandoffTest' \
+            "-Psamford.itBase=http://127.0.0.1:${SAMFORD_BACKEND_PORT}" "-Psamford.e2eOut=${RUNNER_TEMP}/standin-handoff.json"
+          ./gradlew --no-daemon :app:testDebugUnitTest --tests 'com.samford.patient.integration.CrossAppPatientVerifyTest' \
+            "-Psamford.e2eIn=${RUNNER_TEMP}/standin-handoff.json"
+      - name: Cross-app E2E with the real doctor tablet app (pinned commit)
+        run: |
+          git clone --quiet https://github.com/shivam098/samford-doctor-android.git "${RUNNER_TEMP}/doctor-app"
+          git -C "${RUNNER_TEMP}/doctor-app" checkout --quiet "${SAMFORD_DOCTOR_SHA}"
+          (cd "${RUNNER_TEMP}/doctor-app" && \
+            SAMFORD_IT_API_BASE="http://127.0.0.1:${SAMFORD_BACKEND_PORT}/api/mobile/v1" \
+            SAMFORD_E2E_OUT="${RUNNER_TEMP}/handoff.json" \
+            ./gradlew --no-daemon :app:testDebugUnitTest --tests "com.samford.doctor.integration.BackendIntegrationTest.crossAppE2EProducer")
+          cat "${RUNNER_TEMP}/handoff.json"
+          ./gradlew --no-daemon :app:testDebugUnitTest --tests 'com.samford.patient.integration.CrossAppPatientVerifyTest' \
+            "-Psamford.e2eIn=${RUNNER_TEMP}/handoff.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-results
+          path: |
+            app/build/test-results/
+            ${{ runner.temp }}/samford.log
+            ${{ runner.temp }}/handoff.json
+            ${{ runner.temp }}/standin-handoff.json
+
+  emulator:
+    name: Emulator instrumented tests (API 34 phone)
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: android-actions/setup-android@v3
+      - name: Install Android 17 platform
+        run: sdkmanager --install "platforms;android-37.0" "build-tools;37.0.0" || echo "AGP will download missing SDK packages"
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Start isolated Samford backend
+        run: scripts/start-isolated-backend.sh
+      - name: Build app and test APKs
+        run: ./gradlew --no-daemon :app:assembleDebug :app:assembleDebugAndroidTest
+      - name: Instrumented tests, screenshots and Baseline Profile
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash scripts/ci-emulator.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: emulator-results
+          path: |
+            device-screenshots/
+            app/build/outputs/androidTest-results/
+            app/build/reports/androidTests/
+            app/src/release/generated/baselineProfiles/
+            baselineprofile/build/outputs/connected_android_test_additional_output/
+            ${{ runner.temp }}/samford.log

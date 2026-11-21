@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Samford Patient</string>
+
+    <!-- Common actions -->
+    <string name="action_allow">Allow</string>
+    <string name="action_back">Back</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_confirm_sign_out">Sign out and remove</string>
+    <string name="action_more">More options</string>
+    <string name="action_retry">Try again</string>
+    <string name="action_save">Save</string>
+    <string name="badge_amended">Amended</string>
+    <string name="badge_new">New</string>
+    <string name="demo_disclaimer">Synthetic demo for testing. Never enter real patient information.</string>
+    <string name="sample_banner">SAMPLE RECORDS: synthetic data stored on this phone only, not from the hospital.</string>
+    <string name="your_doctor">your doctor</string>
+    <string name="the_pharmacy">the pharmacy</string>
+
+    <!-- Tabs -->
+    <string name="tab_home">Home</string>
+    <string name="tab_records">Records</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Welcome and sign-in -->
+    <string name="welcome_tagline">Your OPD records from Samford Hospital, Ranchi: the doctor\'s own handwriting, on your phone. No paper to keep or lose.</string>
+    <string name="welcome_sign_in">Sign in with mobile number</string>
+    <string name="welcome_explore_sample">Explore sample records (offline)</string>
+    <string name="welcome_preparing_sample">Preparing sample records…</string>
+    <string name="welcome_sample_explainer">Sample records are made up and stored only on this phone, so you can try the app without the hospital server.</string>
+    <string name="sign_in_title">Sign in</string>
+    <string name="sign_in_mobile_intro">Enter the mobile number registered at Samford Hospital. We will send a one-time code.</string>
+    <string name="sign_in_mobile_label">Mobile number</string>
+    <string name="sign_in_send_code">Send code</string>
+    <string name="sign_in_demo_numbers_intro">Testing? Tap a demo number. These synthetic numbers exist on every Samford demo server.</string>
+    <string name="sign_in_code_intro">Enter the 6-digit code sent to %1$s.</string>
+    <string name="sign_in_demo_code_title">DEMO CODE (no SMS is sent)</string>
+    <string name="sign_in_demo_code_explainer">This demo has no SMS service, so the server shows the code here. In a real hospital app it would arrive by SMS.</string>
+    <string name="sign_in_fill_demo_code">Use demo code</string>
+    <string name="sign_in_code_label">6-digit code</string>
+    <string name="sign_in_verify">Verify and sign in</string>
+    <string name="sign_in_resend_in">You can ask for a new code in %1$d s</string>
+    <string name="sign_in_resend">Send a new code</string>
+    <string name="sign_in_change_number">Change number</string>
+
+    <!-- Errors (plain language) -->
+    <string name="error_network">Can\'t reach Samford right now. Check your internet connection. Records already on your phone are still available.</string>
+    <string name="error_no_server">The hospital server isn\'t set up on this phone yet. Open server settings, or explore the sample records.</string>
+    <string name="error_integrity">A page didn\'t download correctly. Please try again.</string>
+    <string name="error_invalid_mobile">Enter a 10-digit Indian mobile number.</string>
+    <string name="error_code_format">Enter the 6-digit code.</string>
+    <string name="error_mobile_unknown">This mobile number isn\'t registered at Samford Hospital. Please check the number, or ask the front desk.</string>
+    <string name="error_otp_invalid">That code is not right. Please check and try again.</string>
+    <string name="error_otp_expired">That code has expired. Ask for a new code.</string>
+    <string name="error_otp_locked">Too many wrong codes. For your safety, sign-in is paused for 30 minutes.</string>
+    <string name="error_rate_limited">Too many requests. Please wait a little and try again.</string>
+    <string name="error_session_expired">Your sign-in has ended. Please sign in again to get new records.</string>
+    <string name="error_session_revoked">This phone was signed out by the hospital. Records were removed from this phone.</string>
+    <string name="error_forbidden">You don\'t have access to this record.</string>
+    <string name="error_not_found">This record is no longer available.</string>
+    <string name="error_server">The hospital server had a problem. Please try again in a few minutes.</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <plurals name="error_otp_invalid_attempts">
+        <item quantity="one">That code is not right. %d try left before sign-in is paused.</item>
+        <item quantity="other">That code is not right. %d tries left before sign-in is paused.</item>
+    </plurals>
+    <plurals name="error_otp_locked_wait">
+        <item quantity="one">Too many wrong codes. Please try again in %d minute.</item>
+        <item quantity="other">Too many wrong codes. Please try again in %d minutes.</item>
+    </plurals>
+    <plurals name="error_rate_limited_wait">
+        <item quantity="one">Too many requests. Please try again in %d minute.</item>
+        <item quantity="other">Too many requests. Please try again in %d minutes.</item>
+    </plurals>
+
+    <!-- Server -->
+    <string name="server_title">Hospital server</string>
+    <string name="server_online">Connected</string>
+    <string name="server_checking">Checking…</string>
+    <string name="server_unreachable">Can\'t reach the server</string>
+    <string name="server_offline">Server is offline</string>
+    <string name="server_unknown">Not checked yet</string>
+    <string name="server_update_required">Update needed</string>
+    <string name="server_update_required_body">This version of the app is too old for the hospital server. Please install the latest version.</string>
+    <string name="server_unreachable_help">You can still read records saved on this phone, or explore the sample records.</string>
+    <string name="server_operator_message">Message from the demo team: %1$s</string>
+    <string name="server_settings">Server settings</string>
+    <string name="server_source_manual">Using an address you entered.</string>
+    <string name="server_source_discovery">Found automatically from the Samford discovery page.</string>
+    <string name="server_source_last_good">Using the last server that worked.</string>
+    <string name="server_source_none">No working server found yet.</string>
+    <string name="server_check_again">Check again</string>
+    <string name="server_manual_title">Enter a server address</string>
+    <string name="server_manual_help">Ask the demo organiser for the address, for example https://…trycloudflare.com/api/mobile/v1.</string>
+    <string name="server_address_label">Server address</string>
+    <string name="server_connect">Connect</string>
+    <string name="server_save_anyway">Save this address anyway</string>
+    <string name="server_scan_qr">Scan server QR code</string>
+    <string name="server_use_automatic">Stop using my address (find the server automatically)</string>
+    <string name="server_discovery_title">Discovery page (advanced)</string>
+    <string name="server_discovery_help">The app reads the current server address from: %1$s</string>
+    <string name="server_discovery_label">Discovery page address</string>
+    <string name="server_discovery_save">Use this page</string>
+    <string name="server_discovery_reset">Reset to default</string>
+    <string name="server_saved">Connected. The app will use this server.</string>
+    <string name="server_invalid_address">That doesn\'t look like a web address.</string>
+    <string name="server_https_required">For safety this app only connects to addresses that start with https://.</string>
+    <string name="server_could_not_reach">Couldn\'t reach that server. Check the address and your internet connection.</string>
+    <string name="server_qr_not_samford">That QR code isn\'t a Samford server code.</string>
+    <string name="server_scan_unavailable">The QR scanner isn\'t available on this phone. Scan the code with your phone\'s camera app instead.</string>
+    <string name="server_link_review">A server link was opened. Check the address below, then tap Connect.</string>
+
+    <!-- Home -->
+    <string name="home_title">Samford Patient</string>
+    <string name="home_updated_at">Updated %1$s</string>
+    <string name="home_offline_status">Offline. Showing records saved on this phone, last updated %1$s.</string>
+    <string name="home_never_updated">Not updated yet. Pull down to refresh.</string>
+    <string name="home_sample_status">Sample mode: nothing is sent to or received from the hospital.</string>
+    <string name="home_session_expired">Your sign-in has ended. Records on this phone are still readable; sign in again to get new ones.</string>
+    <string name="home_sign_in_again">Sign in again</string>
+    <string name="home_notifications_prompt">Get a notification when a new prescription, report or result is ready. The notification never shows names or medical details.</string>
+    <string name="home_empty_title">No records yet</string>
+    <string name="home_empty_body">When your doctor completes an OPD visit, the handwritten notes appear here.</string>
+    <string name="feed_new_prescription">New prescription from %1$s</string>
+    <string name="feed_new_visit_summary">New visit summary from %1$s</string>
+    <string name="feed_new_investigations">Tests advised by %1$s</string>
+    <string name="feed_new_advice">Advice or referral from %1$s</string>
+    <string name="feed_new_document">New document from %1$s</string>
+    <string name="feed_amended">%1$s amended by %2$s</string>
+    <string name="feed_lab_result_ready">Lab result ready: %1$s</string>
+    <string name="feed_lab_results_ready">Lab result ready</string>
+    <string name="feed_sample_collected">Sample collected at %1$s</string>
+    <string name="feed_dispensed">Medicines dispensed by %1$s</string>
+    <string name="feed_partially_dispensed">Some medicines dispensed by %1$s</string>
+    <string name="feed_unavailable">Medicines not dispensed at %1$s</string>
+    <string name="feed_token_called">Token %1$s called. Please go to the doctor\'s room.</string>
+    <string name="feed_token_called_no_number">Your token was called. Please go to the doctor\'s room.</string>
+    <string name="feed_visit_completed">Visit with %1$s completed</string>
+    <string name="feed_update">Your record was updated</string>
+
+    <!-- Records -->
+    <string name="records_title">Records</string>
+    <string name="records_empty_title">No visits yet</string>
+    <string name="records_empty_body">Visits appear here after the doctor marks them completed.</string>
+    <string name="records_allergies">Allergies: %1$s</string>
+    <string name="records_handwritten_by">Handwritten by %1$s</string>
+    <string name="records_sent_to">Sent to %1$s</string>
+    <string name="records_lab_results">Lab results</string>
+    <string name="visit_title">Visit</string>
+    <string name="kind_visit_summary">Visit summary</string>
+    <string name="kind_prescription">Prescription</string>
+    <string name="kind_investigations">Investigations</string>
+    <string name="kind_advice_referral">Advice / referral</string>
+    <string name="kind_other">Document</string>
+    <string name="recipient_pharmacy">Pharmacy</string>
+    <string name="recipient_lab">Lab</string>
+    <string name="recipient_patient">You</string>
+    <string name="state_available">Received</string>
+    <string name="state_viewed">Opened</string>
+    <string name="state_dispensed">Dispensed</string>
+    <string name="state_partially_dispensed">Partly dispensed</string>
+    <string name="state_not_dispensed">Not dispensed</string>
+    <string name="state_sample_collected">Sample collected</string>
+    <string name="state_result_ready">Result ready</string>
+    <string name="state_superseded">Replaced by newer version</string>
+    <string name="flag_normal">Within range</string>
+    <string name="flag_abnormal">Outside range</string>
+    <string name="flag_critical">Needs urgent attention</string>
+    <string name="flag_reported">Reported</string>
+    <string name="visit_booked">Booked</string>
+    <string name="visit_waiting">Waiting</string>
+    <string name="visit_called">Called</string>
+    <string name="visit_in_consultation">With doctor</string>
+    <string name="visit_on_hold">On hold</string>
+    <string name="visit_missed">Missed</string>
+    <string name="visit_cancelled">Cancelled</string>
+
+    <!-- Document viewer -->
+    <string name="viewer_versions">Version history</string>
+    <string name="viewer_details">Details</string>
+    <string name="viewer_share">Share PDF</string>
+    <string name="viewer_share_title">Share record</string>
+    <string name="viewer_save_pdf">Save PDF to phone</string>
+    <string name="viewer_saved">PDF saved.</string>
+    <string name="viewer_export_missing">Some pages haven\'t been downloaded yet. Connect to the internet and try again.</string>
+    <string name="viewer_no_pages">This document has no pages yet.</string>
+    <string name="viewer_page_of">Page %1$d of %2$d</string>
+    <string name="viewer_page_description">Handwritten page %1$d of %2$d</string>
+    <string name="viewer_zoom_hint">Pinch or double-tap to zoom. Swipe for the next page.</string>
+    <string name="viewer_amended_banner">Amended on %1$s by %2$s.</string>
+    <string name="viewer_amended_reason">Reason: %1$s</string>
+    <string name="viewer_see_versions">See all versions</string>
+    <string name="viewer_viewing_original" tools:ignore="PluralsCandidate">You are viewing version %1$d, the original from %2$s. It was later amended.</string>
+    <string name="viewer_viewing_older" tools:ignore="PluralsCandidate">You are viewing version %1$d from %2$s. A newer version exists.</string>
+    <string name="viewer_view_latest">View latest</string>
+    <string name="viewer_versions_title">Version history</string>
+    <string name="viewer_versions_explainer">Every version the doctor signed is kept unchanged. Corrections are added as new versions.</string>
+    <string name="viewer_version_title">Version %1$d · %2$s</string>
+    <string name="viewer_version_original">Original</string>
+    <string name="viewer_version_amended">Amended</string>
+    <string name="viewer_version_latest">Latest</string>
+    <string name="viewer_record_hash">Record fingerprint %1$s</string>
+    <string name="viewer_sent_to_title">Who received this</string>
+    <string name="viewer_sent_to_none">Only you.</string>
+    <string name="viewer_typed_title">Typed summary</string>
+    <string name="viewer_typed_explainer">Typed by the doctor to help screen readers and search. It is not verified; the handwriting above is the record.</string>
+    <string name="viewer_typed_diagnosis">Diagnosis: %1$s</string>
+    <plurals name="viewer_typed_days">
+        <item quantity="one">%d day</item>
+        <item quantity="other">%d days</item>
+    </plurals>
+    <string name="viewer_integrity_title">Same as the doctor\'s copy</string>
+    <string name="viewer_integrity_body">Each page is checked against its SHA-256 fingerprint after download, so you see exactly what the doctor wrote on the tablet. The same pages went to the pharmacy and labs.</string>
+    <string name="pdf_watermark">SAMPLE · Synthetic demo record · Not for clinical use</string>
+    <string name="pdf_footer">Samford Patient copy</string>
+
+    <!-- Lab result -->
+    <string name="lab_title">Lab result</string>
+    <string name="lab_reference_range">Reference range: %1$s</string>
+    <string name="lab_reported_at">Reported %1$s</string>
+    <string name="lab_explainer">Results are shared after the lab verifies them. Please talk to your doctor about what they mean for you.</string>
+    <string name="lab_open_report">Open report (PDF)</string>
+
+    <!-- Profiles -->
+    <string name="profile_switch">Switch family member</string>
+    <plurals name="profile_age">
+        <item quantity="one">%d year</item>
+        <item quantity="other">%d years</item>
+    </plurals>
+    <string name="profile_uhid">UHID %1$s</string>
+    <string name="sex_female">Female</string>
+    <string name="sex_male">Male</string>
+    <string name="sex_other">Other</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_account">Account</string>
+    <string name="settings_signed_in_as">Signed in with mobile %1$s</string>
+    <string name="settings_sample_account">Sample mode: no account is signed in.</string>
+    <string name="settings_profiles_linked">Family members linked to this mobile:</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_phone">Same as phone</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_hindi">हिन्दी (Hindi)</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_notifications_switch">Notify me about new records</string>
+    <string name="settings_notifications_explainer">This demo has no push service. The phone checks for news about every 30 minutes in the background and every minute while the app is open, so alerts can be delayed. Notifications never show names or medical details.</string>
+    <string name="settings_offline">Offline and storage</string>
+    <string name="settings_auto_download">Download new pages on Wi-Fi</string>
+    <string name="settings_storage_used">Saved pages use %1$s MB (limit %2$d MB). Older pages are removed first when the limit is reached; they download again when opened.</string>
+    <string name="settings_clear_downloads">Remove downloaded pages</string>
+    <string name="settings_app_lock">App lock</string>
+    <string name="settings_app_lock_switch">Ask for a PIN to open the app</string>
+    <string name="settings_app_lock_explainer">Useful on a shared family phone. The app locks when opened and after 30 seconds in the background.</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version %1$s (%2$d)</string>
+    <string name="settings_about_body">Records are read-only copies of what Samford Hospital released to you. They are stored on this phone without cloud backup.</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_leave_sample">Leave sample mode</string>
+    <string name="settings_leave_sample_body">The sample records will be removed from this phone.</string>
+    <string name="settings_sign_out_confirm_title">Sign out?</string>
+    <string name="settings_sign_out_confirm_body">All records and downloaded pages will be removed from this phone. Your records stay safe at the hospital; sign in again to see them.</string>
+    <string name="pin_setup_title">Set an app PIN</string>
+    <string name="pin_setup_body">Choose 4 to 6 digits. If you forget it, you can sign out and sign in again.</string>
+    <string name="pin_label">PIN</string>
+    <string name="pin_confirm_label">Enter the PIN again</string>
+    <string name="pin_invalid">Use 4 to 6 digits.</string>
+    <string name="pin_mismatch">The two PINs don\'t match.</string>
+
+    <!-- Lock -->
+    <string name="lock_title">Enter your PIN to open your records</string>
+    <string name="lock_unlock">Unlock</string>
+    <string name="lock_forgot">Forgot PIN?</string>
+    <string name="lock_forgot_body">Sign out to reset the PIN. Records will be removed from this phone; sign in again to see them.</string>
+    <string name="lock_paused">Too many wrong PINs. Try again after %1$s.</string>
+    <plurals name="lock_wrong_pin">
+        <item quantity="one">Wrong PIN. %d try left before a pause.</item>
+        <item quantity="other">Wrong PIN. %d tries left before a pause.</item>
+    </plurals>
+
+    <!-- Notifications: always generic, never names or clinical details -->
+    <string name="notification_channel_name">Record updates</string>
+    <string name="notification_channel_description">Tells you when something new is ready in the app. Never shows names or medical details.</string>
+    <string name="notification_generic">You have an update. Open the app to view it.</string>
+    <plurals name="notification_new_updates">
+        <item quantity="one">You have %d new update. Open the app to view it.</item>
+        <item quantity="other">You have %d new updates. Open the app to view them.</item>
+    </plurals>
+</resources>
