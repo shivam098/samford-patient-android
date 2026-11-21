@@ -3,8 +3,8 @@
 This is how the Samford Patient app keeps a family's OPD records on the phone, keeps them current
 without push notifications, and stays cheap for the server at 1 lakh users. The API contract is
 owned by the backend: `docs/mobile-api-v1.yaml` and `docs/mobile-sync.md` in
-[shivam098/samford-web-app](https://github.com/shivam098/samford-web-app) (v1.0.0, M2 commit
-`83be4ae`).
+[shivam098/samford-web-app](https://github.com/shivam098/samford-web-app) (v1.0.0; built against M2 commit
+`83be4ae`, re-verified at `dffde17`).
 
 ## Data flow
 

@@ -8,21 +8,23 @@ Gradle 9.9.2, AGP 9.5.2, Kotlin 2.4.21. Date: 2026-11-21 (IST).
 
 | Command | Result |
 |---|---|
-| `gradlew :app:assembleDebug :app:assembleRelease :app:printApkSizes` | BUILD SUCCESSFUL; debug 15.66 MB, **release (R8 + resource shrinking) 2.30 MB** |
+| `gradlew :app:assembleDebug :app:assembleRelease :app:printApkSizes` | BUILD SUCCESSFUL; **release (R8 + resource shrinking, with the CI-generated Baseline Profile) 2.43 MB** (`assets/dexopt/baseline.prof` 13 KB) |
 | `gradlew :app:lintDebug` | 0 errors, 1 warning (Compose BOM 2026.11.01 exists but needs compileSdk 37.1, which is not installed; 2026.09.00 is used) |
 | `gradlew :app:compileDebugAndroidTestKotlin :baselineprofile:assemble` | BUILD SUCCESSFUL |
 
 ## 2. Unit, Robolectric and Compose UI tests (local)
 
-`gradlew :app:testDebugUnitTest` (and `:app:recordRoborazziDebug`, which runs the same tests and
-writes screenshots): **61 tests, 0 failures** (6 backend tests skipped without a backend; see §3).
+`gradlew :app:lintDebug :app:testDebugUnitTest :app:assembleRelease` (and `:app:recordRoborazziDebug`,
+which runs the same tests and writes screenshots): **71 tests, 0 failures, 7 skipped** (the 7 backend
+and cross-app tests skip without a backend; see §3 and §4).
 
 | Suite | Tests | Covers |
 |---|---|---|
 | `SyncEngineTest` | 12 | quiet first-sync backfill; steady state = exactly 1 conditional request; amendment via notification → feed → record with v1 kept; feed ETag/304 skips the record; `429` + `Retry-After` honoured even by manual refresh (≤10 % spread); exponential backoff bounds; failed record fetch retried next run; expired vs revoked token; records of another patient never applied; pharmacy state → Home item with recipient name; baseline paging of notifications; idempotent viewed acks |
 | `BackoffPolicyTest` | 6 | equal-jitter bounds per attempt, 6 h cap, Retry-After floor/spread, jitter diversity; **1 lakh simulated installs spread evenly across the 30-minute window (every minute 2,800–3,900)** |
 | `BlobStoreTest` | 5 | SHA-256 verified download then zero-request reopen; corrupted download rejected and not cached; LRU eviction within the cap, pinned sample pages kept, recently opened page survives; 8 concurrent opens = 1 download; clearing downloads keeps pinned pages |
-| `SessionAndAuthTest` | 6 | sign-in stores token and family profiles; wrong code shows attempts left; **sign-out wipes records, versions, pages, Home items, acks, sync state, blob index, page files, share PDFs, app lock and token, keeping server address**; a different mobile on the same phone never sees the previous records; sample mode replaced on sign-in; revoked device wipes, expired token keeps records readable |
+| `SessionAndAuthTest` | 7 | sign-in stores token and family profiles; **the first adult profile opens even when a child is listed first, and re-sign-in keeps the last chosen profile**; wrong code shows attempts left; **sign-out wipes records, versions, pages, Home items, acks, sync state, blob index, page files, share PDFs, app lock and token, keeping server address**; a different mobile on the same phone never sees the previous records; sample mode replaced on sign-in; revoked device wipes, expired token keeps records readable |
+| `NotifierTest` | 2 | notification text is generic ("2 new updates": no names, doctors, tests or medicines), private visibility with a public lock-screen version, each item notified once; with notifications off, items are marked without posting |
 | `HttpMobileApiTest` | 9 | Bearer + `X-Device-Id` + `X-Samford-App(-Version)` + If-None-Match, no cookies; 304; `Idempotency-Key` on POSTs and exact contract bodies; error envelope, `Retry-After`, `attemptsRemaining`, `DEVICE_SIGNED_OUT`; non-JSON 503; network failure; signed-out calls not sent; blob path only for valid hashes; API root normalisation; HTTP-date Retry-After |
 | `ServerDirectoryTest` | 7 | discovery validated with `/meta` and remembered; last-good tried first; offline discovery message; update-required from discovery and `/meta`; manual override never silently replaced; release refuses plain HTTP to LAN hosts; QR payload formats |
 | `AppLockTest` | 3 | PIN stored only as salted PBKDF2 hash; lock on launch and after 30 s; five wrong PINs pause entry |
@@ -36,18 +38,33 @@ grouped per order). Hindi strings render correctly; handwriting and doctor-typed
 
 ## 3. Real mock backend integration (local)
 
-Backend: `shivam098/samford-web-app` at `83be4ae` (M2), started with
+Backend: `shivam098/samford-web-app` at `dffde17` (seed with the doctor app's real `samford-ink/1`
+pages and a real prescription addendum for patient-b), started with
 `npm run mobile:isolated -- --port 4321 --data <temp> --reset --relaxed-limits --test-support`.
+(The same tests also passed earlier against `83be4ae`, M2.)
 
-`gradlew :app:testDebugUnitTest --tests "com.samford.patient.integration.*" "-Psamford.itBase=http://127.0.0.1:4321"`
-→ **4/4 passed** (`BackendIntegrationTest`):
+`gradlew :app:testDebugUnitTest --tests "com.samford.patient.integration.BackendIntegrationTest" --tests "com.samford.patient.integration.BackendUiJourneyTest" "-Psamford.itBase=http://127.0.0.1:4321"`
+→ **5/5 passed**:
 
 | Test | Result |
 |---|---|
-| Seeded family `9000000001`: sign in with the returned demo code, sync, download every current page and verify SHA-256; dispensed state present | passed; first sync **6 requests**, steady state **1 request (304)**, 4 pages verified |
+| Seeded family `9000000001`: sign in with the returned demo code, sync, download every current page and verify SHA-256; dispensed state present | passed; first sync **6 requests**, steady state **1 request (304)** |
 | API-driven stand-in tablet completes a visit for a fresh patient (2-page prescription to pharmacy, investigations to `central-lab`) → patient signs in → **page hashes and bytes identical**; pharmacy dispenses → Home "Medicines dispensed" (3 requests); lab collects and releases Haemoglobin → result and Home item; doctor addendum → v2 with reason, **v1 pages unchanged**, Home "amended"; viewed ack accepted once | passed |
 | Another family (`9000000003`) gets 404 for patient A's document, record and page blob | passed |
-| Second family (`9000000002`) syncs, every existing version is readable, and acknowledging an unread document succeeds once | passed |
+| Second family (`9000000002`): the seeded prescription has versions 1 and 2, v2 reason "Corrected dose and duration (synthetic sample)", v2 = the unchanged v1 page plus one new page (all hashes verified), latest recipients PATIENT `AVAILABLE` and PHARMACY `DISPENSED`; acknowledging an unread document succeeds once | passed |
+| `BackendUiJourneyTest`: the real screens, HTTP client and sync stack (Robolectric) sign in with the server's demo code, reach Home with items, open Records and a handwritten page | passed |
+
+**Defect found by these tests and fixed:** the server lists family profiles by name, so for
+`9000000001` "Demo child A" came first and became the active profile, leaving Home empty after
+sign-in. Sign-in now opens the first adult profile and keeps the user's last choice on re-sign-in.
+
+**Live public demo (read-only check, once):** discovery gist `status: online`, `apiBaseUrl`
+`https://preview-ellen-excitement-continuing.trycloudflare.com/api/mobile/v1` (backend `518864a`),
+`GET /meta` 200. `BackendIntegrationTest.seededFamilySignsInAndEveryPageMatchesItsHash` with
+`-Psamford.itBase=https://preview-ellen-excitement-continuing.trycloudflare.com` → **passed** over
+HTTPS through Cloudflare: first sync 6 requests, steady state **1 request answered 304** (weak ETag
+round-trips), 4 handwritten pages downloaded and SHA-256 verified. Other tests that create visits or
+acknowledge documents were not run against the shared live server.
 
 ## 4. Cross-app end to end with the real doctor tablet app (local)
 
@@ -57,6 +74,8 @@ Backend: `shivam098/samford-web-app` at `83be4ae` (M2), started with
 2. Patient app: `gradlew :app:testDebugUnitTest --tests "com.samford.patient.integration.CrossAppPatientVerifyTest" "-Psamford.e2eIn=<file>"`
    → **passed**: signed in with the handoff mobile via OTP, synced, and for each document the page
    SHA-256 list and the downloaded bytes were identical to what the tablet signed; PDF hashes matched.
+   Re-run against backend `dffde17`: producer BUILD SUCCESSFUL (visit `visit-74459b5b-…`, Visit
+   summary + Prescription), verifier passed.
 3. The doctor's prescription page fetched as the patient was viewed by eye: it carries the
    "SYNTHETIC SAMPLE - not for clinical use" banner and is 232,623 bytes with the expected SHA-256.
 

@@ -1,5 +1,7 @@
 package com.samford.patient
 
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -60,8 +62,9 @@ class BackendDeviceTest {
         compose.saveScreenshot("device-backend-02-home")
         compose.onNodeWithTag("nav_records").performClick()
         compose.awaitTag("document_card", 60_000)
+        Thread.sleep(2_000)
         compose.saveScreenshot("device-backend-03-records")
-        compose.onNodeWithTag("document_card").performClick()
+        compose.onNode(hasTestTag("document_card") and hasText("Prescription", substring = true)).performClick()
         compose.awaitTag("page_image", 60_000)
         Thread.sleep(2_000)
         compose.saveScreenshot("device-backend-04-document")

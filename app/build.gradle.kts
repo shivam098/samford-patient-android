@@ -92,6 +92,11 @@ android {
                 it.systemProperty("samford.e2eIn", (findProperty("samford.e2eIn") as String?).orEmpty())
                 it.systemProperty("samford.e2eOut", (findProperty("samford.e2eOut") as String?).orEmpty())
                 it.systemProperty("java.awt.headless", "true")
+                // Runs against a live backend or handoff file must really execute, never come from cache.
+                if (integrationBase.isNotEmpty() || findProperty("samford.e2eIn") != null || findProperty("samford.e2eOut") != null) {
+                    it.outputs.upToDateWhen { false }
+                    it.outputs.cacheIf { false }
+                }
             }
         }
         animationsDisabled = true

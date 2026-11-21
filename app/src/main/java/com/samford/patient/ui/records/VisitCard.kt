@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -136,7 +137,13 @@ private fun DocumentTile(
                 ) {
                     val file = thumb
                     if (file != null) {
-                        AsyncImage(model = file, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.size(width = 48.dp, height = 64.dp))
+                        AsyncImage(
+                            model = file,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            placeholder = ColorPainter(Color.White),
+                            modifier = Modifier.size(width = 48.dp, height = 64.dp),
+                        )
                     } else {
                         Surface(color = MaterialTheme.colorScheme.primaryContainer, modifier = Modifier.size(width = 48.dp, height = 64.dp)) {
                             Box(contentAlignment = Alignment.Center) {

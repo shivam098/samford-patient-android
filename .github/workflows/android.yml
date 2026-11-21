@@ -95,7 +95,8 @@ jobs:
           (cd "${RUNNER_TEMP}/doctor-app" && \
             SAMFORD_IT_API_BASE="http://127.0.0.1:${SAMFORD_BACKEND_PORT}/api/mobile/v1" \
             SAMFORD_E2E_OUT="${RUNNER_TEMP}/handoff.json" \
-            ./gradlew --no-daemon :app:testDebugUnitTest --tests "com.samford.doctor.integration.BackendIntegrationTest.crossAppE2EProducer")
+            ./gradlew --no-daemon :app:testDebugUnitTest --rerun --tests "com.samford.doctor.integration.BackendIntegrationTest.crossAppE2EProducer")
+          test -s "${RUNNER_TEMP}/handoff.json"
           cat "${RUNNER_TEMP}/handoff.json"
           ./gradlew --no-daemon :app:testDebugUnitTest --tests 'com.samford.patient.integration.CrossAppPatientVerifyTest' \
             "-Psamford.e2eIn=${RUNNER_TEMP}/handoff.json"

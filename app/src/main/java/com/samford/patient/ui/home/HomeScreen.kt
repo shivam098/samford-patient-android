@@ -21,7 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
@@ -269,7 +269,8 @@ private fun FeedRow(item: FeedItemEntity, onClick: () -> Unit) {
     val (icon, tint) = when (item.kind) {
         FeedKinds.DOCUMENT_NEW -> Icons.Filled.Edit to MaterialTheme.colorScheme.primary
         FeedKinds.DOCUMENT_AMENDED -> Icons.Filled.Edit to Amber
-        FeedKinds.LAB_RESULT_READY -> Icons.Filled.CheckCircle to OkGreen
+        // Neutral icon: "ready" says nothing about whether the result is within range.
+        FeedKinds.LAB_RESULT_READY -> Icons.AutoMirrored.Filled.List to MaterialTheme.colorScheme.primary
         FeedKinds.MEDICINES_DISPENSED, FeedKinds.MEDICINES_PARTIAL, FeedKinds.MEDICINES_UNAVAILABLE ->
             Icons.Filled.ShoppingCart to MaterialTheme.colorScheme.secondary
         FeedKinds.TOKEN_CALLED -> Icons.Filled.Notifications to OkGreen

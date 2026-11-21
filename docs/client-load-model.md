@@ -21,6 +21,13 @@ JSON; real handwriting pages are larger than the seeded placeholder (a 1240×175
 typically 100–400 KB). TLS and HTTP/2 change the per-request overhead: HTTP/2 header compression
 makes a repeated 304 poll much smaller than the 1.06 KB measured here.
 
+On the public demo URL (Cloudflare tunnel in front of the same mock, backend commit `518864a`),
+Cloudflare gzips JSON for clients that send `Accept-Encoding: gzip` (the backend measured a profile
+list shrinking from 620 to 198 bytes). OkHttp sends that header and decompresses transparently, so
+the JSON figures above are upper bounds; 304 replies have no body either way. The backend's
+[scale design](https://github.com/shivam098/samford-web-app/blob/main/docs/scale-design.md) uses this
+model as a cross-check (§1) and covers compression (§2.1).
+
 Measured request counts with the real client against the same backend (`BackendIntegrationTest`):
 
 | Situation | Requests |

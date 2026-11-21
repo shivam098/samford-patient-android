@@ -41,9 +41,12 @@ labelled **DEMO CODE**. Tap *Use demo code*, then *Verify and sign in*.
 
 | Demo mobile | What you will see |
 |---|---|
-| `9000000001` | Demo patient A and Demo child A (switch between them from the name at the top): an earlier handwritten visit with a visit summary, a dispensed prescription, investigations and a released Haemoglobin result |
-| `9000000002` | Demo patient B: an earlier handwritten visit (summary, dispensed prescription, investigations with a fasting glucose result) that has not been opened yet |
-| `9000000003` | Demo patient C |
+| `9000000001` | Demo patient A (opens first) and Demo child A (switch between them from the name at the top): an earlier handwritten visit with a visit summary, a dispensed prescription, investigations and a released Haemoglobin result |
+| `9000000002` | Demo patient B: an earlier handwritten visit (summary, dispensed prescription, investigations with a fasting glucose result) that has not been opened yet; the prescription was amended (version 2 with a reason; version 1 stays viewable) |
+| `9000000003` | Demo patient C (isolated test backend only; the public demo has no profile for it) |
+
+The public demo server is shared synthetic data: anyone with the link can change it, so records may
+differ from this table. Never enter real patient information.
 
 Amendments: the offline sample records include a prescription amended to version 2, with the
 original still viewable from version history.
@@ -75,7 +78,7 @@ To test against your own isolated backend:
 
 ```powershell
 git clone https://github.com/shivam098/samford-web-app.git; cd samford-web-app
-git checkout 83be4ae; npm ci
+git checkout dffde17; npm ci
 npm run mobile:isolated -- --port 4321 --data "$env:TEMP\samford-4321" --reset --relaxed-limits --test-support
 ```
 
@@ -125,7 +128,7 @@ flowchart LR
 | Area | Choice | Why |
 |---|---|---|
 | Language/UI | Kotlin 2.4, Jetpack Compose (BOM 2026.09), Material 3 | Android-native, small, fast to iterate |
-| Build | AGP 9.5.2 (built-in Kotlin), Gradle 9.9.2, KSP, R8 + resource shrinking | ~2.3 MB release APK |
+| Build | AGP 9.5.2 (built-in Kotlin), Gradle 9.9.2, KSP, R8 + resource shrinking | ~2.4 MB release APK |
 | Storage | Room 2.8, DataStore, files in `noBackupFilesDir` | transactional sync; no cloud backup of health data |
 | Network | OkHttp 5, kotlinx.serialization | small; tolerant decoding (unknown fields ignored) |
 | Images | Coil 3 + Telephoto zoomable image | sub-sampled deep zoom without huge bitmaps |
@@ -157,8 +160,8 @@ Requirements: JDK 21, Android SDK with platform 37, and `ANDROID_HOME` set (or `
 .\gradlew :app:assembleDebug                      # debug APK
 .\gradlew :app:lintDebug :app:testDebugUnitTest   # lint, unit and Robolectric UI tests
 .\gradlew :app:recordRoborazziDebug               # regenerate docs/screenshots
-# Real backend integration tests (backend running on port 4321):
-.\gradlew :app:testDebugUnitTest --tests "com.samford.patient.integration.BackendIntegrationTest" "-Psamford.itBase=http://127.0.0.1:4321"
+# Real backend integration and UI journey tests (backend running on port 4321):
+.\gradlew :app:testDebugUnitTest --tests "com.samford.patient.integration.BackendIntegrationTest" --tests "com.samford.patient.integration.BackendUiJourneyTest" "-Psamford.itBase=http://127.0.0.1:4321"
 # Cross-app E2E: the doctor app writes a handoff file, then this app verifies it
 .\gradlew :app:testDebugUnitTest --tests "com.samford.patient.integration.CrossAppPatientVerifyTest" "-Psamford.e2eIn=<handoff.json>"
 # Emulator or device tests, optionally against the backend on the host:
