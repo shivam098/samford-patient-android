@@ -18,7 +18,7 @@ env:
   SAMFORD_BACKEND_SHA: dffde174d2db74c42dae79e3de20b5f0cd58ba0f
   SAMFORD_BACKEND_PORT: "4321"
   # Doctor tablet app commit whose real sync code produces the cross-app E2E handoff.
-  SAMFORD_DOCTOR_SHA: 2cbc7a533d740b10be22a020f106a46a8998e51d
+  SAMFORD_DOCTOR_SHA: 3c1c1e6f5e88a15df6d6d6211b3b53b00ca65225
 
 jobs:
   build-test:

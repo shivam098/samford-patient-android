@@ -77,6 +77,10 @@ acknowledge documents were not run against the shared live server.
    SHA-256 list and the downloaded bytes were identical to what the tablet signed; PDF hashes matched.
    Re-run against backend `dffde17`: producer BUILD SUCCESSFUL (visit `visit-74459b5b-…`, Visit
    summary + Prescription), verifier passed.
+   **Doctor app release v0.1.0** (`3c1c1e6`, tag `v0.1.0`; its HTTP client now reads bodies off the
+   main thread and rediscovers a moved server) against backend `dffde17`: producer run with `--rerun`
+   → handoff written (visit `visit-d4cc5b7c-…`, Visit summary v1 + Prescription v1, one page each),
+   verifier **passed**. CI now pins this commit.
 3. The doctor's prescription page fetched as the patient was viewed by eye: it carries the
    "SYNTHETIC SAMPLE - not for clinical use" banner and is 232,623 bytes with the expected SHA-256.
 
