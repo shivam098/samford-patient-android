@@ -105,6 +105,16 @@ device screenshots and Baseline Profile generation. Results of the first runs ar
 
 GitHub Actions run [44867523344](https://github.com/shivam098/samford-patient-android/actions/runs/44867523344)
 on commit `3a86894` (backend pinned at `dffde17`, doctor app at `2cbc7a5`): **all three jobs passed**.
+The release commit `b20201b` passed the same three jobs in run
+[44868478839](https://github.com/shivam098/samford-patient-android/actions/runs/44868478839), whose
+`integration-results` artifact keeps each step's JUnit XML (backend 4 + 1, stand-in and real doctor-app
+cross-app verification).
+
+**Release v0.1.0** (built locally from `b20201b` with the patient release key):
+`samford-patient-v0.1.0.apk`, 2.45 MB, versionCode 1, minSdk 26, targetSdk 37, APK Signature Scheme
+v2 + v3 verified by `apksigner`, SHA-256
+`e6b7b9751ec25ddf52d5c906aa875bffb697b01d6353129f130c6a68d5559525`. The asset downloaded back from the
+public release page has the same SHA-256.
 
 | Job | Result |
 |---|---|
