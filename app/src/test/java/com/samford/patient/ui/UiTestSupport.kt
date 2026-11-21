@@ -32,15 +32,19 @@ fun ComposeTestRule.settle(rounds: Int = 6) {
 }
 
 @OptIn(ExperimentalTestApi::class)
-fun ComposeTestRule.waitForTag(tag: String, timeoutMs: Long = 20_000): SemanticsNodeInteraction {
+fun ComposeTestRule.waitForTag(tag: String, timeoutMs: Long = 20_000): SemanticsNodeInteraction = waitForCount(tag, 1, timeoutMs)
+
+/** Waits until at least [count] nodes carry [tag] (lists fill in after their container appears). */
+@OptIn(ExperimentalTestApi::class)
+fun ComposeTestRule.waitForCount(tag: String, count: Int, timeoutMs: Long = 20_000): SemanticsNodeInteraction {
     val deadline = System.currentTimeMillis() + timeoutMs
-    while (onAllNodesWithTag(tag).fetchSemanticsNodes().isEmpty()) {
-        check(System.currentTimeMillis() < deadline) { "Timed out waiting for $tag" }
+    while (onAllNodesWithTag(tag).fetchSemanticsNodes().size < count) {
+        check(System.currentTimeMillis() < deadline) { "Timed out waiting for $count x $tag" }
         Thread.sleep(100)
         ShadowLooper.idleMainLooper()
         waitForIdle()
     }
-    return onAllNodesWithTag(tag)[0]
+    return onAllNodesWithTag(tag)[count - 1]
 }
 
 @OptIn(ExperimentalTestApi::class)

@@ -73,7 +73,7 @@ class PatientJourneyTest {
         compose.waitForTag("records_list")
         compose.onNodeWithTag("allergies_banner").assertIsDisplayed()
 
-        compose.onAllNodesWithTag("document_card")[1].performClick() // prescription of the latest visit
+        compose.waitForCount("document_card", 2).performClick() // prescription of the latest visit
         compose.waitForTag("document_pager")
         compose.waitForTag("amended_banner").assertIsDisplayed()
         compose.onNodeWithText("Reason: Paracetamol dose clarified", substring = true).assertIsDisplayed()

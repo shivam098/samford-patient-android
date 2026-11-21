@@ -3,7 +3,6 @@ package com.samford.patient.ui
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
@@ -36,7 +35,7 @@ class ScreenshotTest {
         compose.waitForTag("records_list")
         compose.settle()
         shot("$prefix-03-records")
-        compose.onAllNodesWithTag("document_card")[1].performClick()
+        compose.waitForCount("document_card", 2).performClick()
         compose.waitForTag("document_pager")
         compose.settle(15)
         shot("$prefix-04-prescription-amended")
@@ -124,7 +123,7 @@ class ScreenshotTest {
         compose.onNodeWithTag("nav_settings").assertDoesNotExist()
         androidx.test.espresso.Espresso.pressBack()
         compose.settle()
-        compose.onAllNodesWithTag("document_card")[1].performClick()
+        compose.waitForCount("document_card", 2).performClick()
         compose.waitForTag("document_pager")
         compose.onNodeWithTag("versions_button").assertExists()
         compose.onNodeWithTag("share_button").assertExists()
