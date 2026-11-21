@@ -15,7 +15,7 @@ concurrency:
 
 env:
   # Shared synthetic mock backend (shivam098/samford-web-app), pinned to the M2 mobile API.
-  SAMFORD_BACKEND_SHA: 83be4ae028d9f995cd96cbdf00b430ea61bc3795
+  SAMFORD_BACKEND_SHA: dffde174d2db74c42dae79e3de20b5f0cd58ba0f
   SAMFORD_BACKEND_PORT: "4321"
   # Doctor tablet app commit whose real sync code produces the cross-app E2E handoff.
   SAMFORD_DOCTOR_SHA: 2cbc7a533d740b10be22a020f106a46a8998e51d
@@ -81,7 +81,7 @@ jobs:
       - name: Start isolated Samford backend
         run: scripts/start-isolated-backend.sh
       - name: Backend integration tests
-        run: ./gradlew --no-daemon :app:testDebugUnitTest --tests 'com.samford.patient.integration.BackendIntegrationTest' "-Psamford.itBase=http://127.0.0.1:${SAMFORD_BACKEND_PORT}"
+        run: ./gradlew --no-daemon :app:testDebugUnitTest --tests 'com.samford.patient.integration.BackendIntegrationTest' --tests 'com.samford.patient.integration.BackendUiJourneyTest' "-Psamford.itBase=http://127.0.0.1:${SAMFORD_BACKEND_PORT}"
       - name: Cross-app E2E with the stand-in tablet (API-driven)
         run: |
           ./gradlew --no-daemon :app:testDebugUnitTest --tests 'com.samford.patient.integration.StandInTabletHandoffTest' \

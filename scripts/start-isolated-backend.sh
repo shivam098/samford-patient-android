@@ -3,7 +3,7 @@
 # only) at the pinned commit. Used by CI; works locally on Linux/macOS too.
 set -euo pipefail
 
-SHA="${SAMFORD_BACKEND_SHA:-83be4ae028d9f995cd96cbdf00b430ea61bc3795}"
+SHA="${SAMFORD_BACKEND_SHA:-dffde174d2db74c42dae79e3de20b5f0cd58ba0f}"
 PORT="${SAMFORD_BACKEND_PORT:-4321}"
 WORK="${RUNNER_TEMP:-/tmp}"
 

@@ -1,0 +1,4 @@
+# Starter Baseline Profile for the app's own code (Compose, Room, OkHttp and Coil ship their own).
+# Regenerate on a device or emulator: ./gradlew :app:generateReleaseBaselineProfile
+HSPLcom/samford/patient/**->**(**)**
+Lcom/samford/patient/**;

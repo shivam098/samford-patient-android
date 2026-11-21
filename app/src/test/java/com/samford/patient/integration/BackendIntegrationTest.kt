@@ -205,11 +205,29 @@ class BackendIntegrationTest {
         val records = phone.db.records()
         val docs = records.documentIds("patient-b").mapNotNull { records.document(it) }
         assertThat(docs).isNotEmpty()
-        // Every version that exists stays readable (an addendum, if seeded, keeps version 1).
+        // Every version that exists stays readable.
         for (doc in docs) {
             assertThat(records.versions(doc.id).map { it.version }).contains(doc.currentVersion)
             if (doc.currentVersion > 1) assertThat(records.pages(doc.id, 1)).isNotEmpty()
         }
+        // The seeded prescription carries the doctor app's real addendum: v2 keeps the v1 page and adds one.
+        val rx = docs.single { it.kind == "PRESCRIPTION" }
+        val versions = records.versions(rx.id)
+        assertThat(versions.map { it.version }).containsExactly(1, 2)
+        assertThat(rx.currentVersion).isEqualTo(2)
+        assertThat(versions.single { it.version == 2 }.reason).isEqualTo("Corrected dose and duration (synthetic sample)")
+        val v1Pages = records.pages(rx.id, 1)
+        val v2Pages = records.pages(rx.id, 2).sortedBy { it.pageIndex }
+        assertThat(v2Pages).hasSize(2)
+        assertThat(v2Pages[0].sha256).isEqualTo(v1Pages.first().sha256)
+        assertThat(v2Pages[1].sha256).isNotIn(v1Pages.map { it.sha256 })
+        for (page in v1Pages + v2Pages) {
+            val file = (phone.blobs.fetch(page.sha256, "image/png") as BlobResult.Ready).file
+            assertThat(BlobStore.sha256Hex(file.readBytes())).isEqualTo(page.sha256)
+        }
+        val latest = records.recipients(rx.id).filter { it.version == 2 }.associate { it.kind to it.state }
+        assertThat(latest).containsEntry("PATIENT", "AVAILABLE")
+        assertThat(latest).containsEntry("PHARMACY", "DISPENSED")
         // Acknowledge the latest version of one document, as the viewer does after showing it.
         val doc = docs.first()
         phone.db.acks().insert(com.samford.patient.core.db.PendingAckEntity(doc.id, doc.currentVersion, System.currentTimeMillis(), UUID.randomUUID().toString()))

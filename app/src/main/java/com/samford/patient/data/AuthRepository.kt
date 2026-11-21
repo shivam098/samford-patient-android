@@ -8,6 +8,7 @@ import com.samford.patient.core.network.MobileApi
 import com.samford.patient.core.network.OtpChallengeDto
 import com.samford.patient.core.network.OtpVerifyBody
 import com.samford.patient.core.network.PatientSessionDto
+import com.samford.patient.core.network.ProfileDto
 import com.samford.patient.core.security.TokenStore
 import com.samford.patient.core.settings.SettingsStore
 import com.samford.patient.core.sync.SyncEngine
@@ -69,12 +70,22 @@ class AuthRepository(
         )
         engine.storeProfiles(dto.profiles)
         settings.setSampleMode(false)
-        settings.setActiveProfile(dto.profiles.firstOrNull()?.profileId)
+        val keep = settings.current().activeProfileId?.takeIf { id -> dto.profiles.any { it.profileId == id } }
+        settings.setActiveProfile(keep ?: defaultProfile(dto.profiles)?.profileId)
         session.clearExpired()
     }
 
     companion object {
         const val OTP_LENGTH = 6
+        private const val ADULT_AGE = 18
+
+        /**
+         * The profile shown first after sign-in. The contract does not say which family member owns
+         * the mobile, and the server lists profiles by name, so prefer the first adult (most likely
+         * the person holding the phone) over a child who happens to sort first.
+         */
+        fun defaultProfile(profiles: List<ProfileDto>): ProfileDto? =
+            profiles.firstOrNull { (it.age ?: 0) >= ADULT_AGE } ?: profiles.firstOrNull()
 
         /** Seeded synthetic mobiles on every fresh Samford mock backend (no real numbers). */
         val DEMO_NUMBERS = listOf(

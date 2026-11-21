@@ -1,10 +1,12 @@
 package com.samford.patient.ui
 
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
 import org.junit.Test
@@ -112,7 +114,10 @@ class ScreenshotTest {
         compose.enterSampleMode()
         compose.onNodeWithTag("nav_records").performClick()
         compose.waitForTag("records_list")
-        compose.onAllNodesWithTag("lab_result_row")[3].performScrollTo().performClick()
+        compose.settle()
+        val esrRow = hasTestTag("lab_result_row") and hasText("ESR", substring = true)
+        compose.onNodeWithTag("records_list").performScrollToNode(esrRow)
+        compose.onNode(esrRow).performClick()
         compose.waitForTag("lab_result_card")
         compose.settle()
         shot("phone-en-07-lab-result")

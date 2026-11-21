@@ -46,6 +46,20 @@ class SessionAndAuthTest {
     }
 
     @Test
+    fun signInOpensTheAdultProfileEvenWhenAChildIsListedFirst() = runTest {
+        api.profiles.sortBy { it.name }
+        assertThat(api.profiles.first().profileId).isEqualTo("patient-child")
+
+        signIn()
+        assertThat(c.settings.current().activeProfileId).isEqualTo("patient-a")
+
+        // Signing in again keeps the person the user last chose.
+        c.settings.setActiveProfile("patient-child")
+        signIn()
+        assertThat(c.settings.current().activeProfileId).isEqualTo("patient-child")
+    }
+
+    @Test
     fun wrongCodeReportsAttemptsRemaining() = runTest {
         val challenge = c.auth.requestOtp("9000000001") as ApiResult.Ok
         val result = c.auth.verifyOtp(challenge.value.challengeId, "9000000001", "000000") as ApiResult.Err
