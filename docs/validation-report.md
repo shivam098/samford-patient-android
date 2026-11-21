@@ -103,4 +103,31 @@ device screenshots and Baseline Profile generation. Results of the first runs ar
 
 ## 8. CI results
 
-_Pending first push._
+GitHub Actions run [44867523344](https://github.com/shivam098/samford-patient-android/actions/runs/44867523344)
+on commit `3a86894` (backend pinned at `dffde17`, doctor app at `2cbc7a5`): **all three jobs passed**.
+
+| Job | Result |
+|---|---|
+| Lint, unit/UI tests, APKs, screenshots (ubuntu) | passed: lint 0 errors; **71 tests, 0 failures, 7 skipped** (backend tests run in the next job); debug and unsigned release APKs; Roborazzi screenshots uploaded |
+| Real mock backend integration and cross-app E2E (ubuntu, isolated backend on port 4321) | passed: `BackendIntegrationTest` + `BackendUiJourneyTest`; stand-in tablet handoff → `CrossAppPatientVerifyTest`; **real doctor app** `crossAppE2EProducer` (visit `visit-4c8bc5d2-…`) → `CrossAppPatientVerifyTest` (identical page hashes and bytes) |
+| Emulator instrumented tests (API 34 phone, KVM) | passed: `SampleModeDeviceTest` (2: records, zoom, version history, sign-out wipe; settings, server and language) and `BackendDeviceTest` (real OTP sign-in through `10.0.2.2` → Home items → Records → the doctor's handwritten prescription page); 10 device screenshots; Baseline Profile generated |
+
+The device screenshots were reviewed by eye: the prescription page on the phone is the doctor app's
+`samford-ink/1` page exactly as written, with its "SYNTHETIC SAMPLE - not for clinical use" banner.
+
+Problems found and fixed through CI (earlier runs 44863137008 and 44865687892):
+
+- The Linux test JVM aborted in Robolectric native graphics ("JniConstants: Class not found:
+  java/nio/DoubleBuffer") when a Coil decode thread was first to load the JNI class cache; the test
+  application now primes it on the main thread.
+- The emulator sign-in showed an empty Home: the active profile defaulted to a child listed first by
+  the server (fixed in the app; see §3).
+- A cached Gradle test result replayed the doctor-app producer without running it, so no handoff was
+  written; test tasks given a backend or handoff file are now never cached, and the producer runs with
+  `--rerun`.
+- Home showed a green check for every "Lab result ready", including results outside the range; the
+  icon is now neutral.
+
+Local flake seen once on Windows: `SessionAndAuthTest.signOutRemovesRecordsFilesTokenAndPendingWork`
+failed with DataStore "Unable to rename …preferences_pb.tmp" (a file lock in the Windows temp
+directory); it passed on rerun and in CI.

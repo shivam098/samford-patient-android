@@ -81,13 +81,16 @@ jobs:
       - name: Start isolated Samford backend
         run: scripts/start-isolated-backend.sh
       - name: Backend integration tests
-        run: ./gradlew --no-daemon :app:testDebugUnitTest --tests 'com.samford.patient.integration.BackendIntegrationTest' --tests 'com.samford.patient.integration.BackendUiJourneyTest' "-Psamford.itBase=http://127.0.0.1:${SAMFORD_BACKEND_PORT}"
+        run: |
+          ./gradlew --no-daemon :app:testDebugUnitTest --tests 'com.samford.patient.integration.BackendIntegrationTest' --tests 'com.samford.patient.integration.BackendUiJourneyTest' "-Psamford.itBase=http://127.0.0.1:${SAMFORD_BACKEND_PORT}"
+          mkdir -p "${RUNNER_TEMP}/it-results/backend" && cp app/build/test-results/testDebugUnitTest/*.xml "${RUNNER_TEMP}/it-results/backend/"
       - name: Cross-app E2E with the stand-in tablet (API-driven)
         run: |
           ./gradlew --no-daemon :app:testDebugUnitTest --tests 'com.samford.patient.integration.StandInTabletHandoffTest' \
             "-Psamford.itBase=http://127.0.0.1:${SAMFORD_BACKEND_PORT}" "-Psamford.e2eOut=${RUNNER_TEMP}/standin-handoff.json"
           ./gradlew --no-daemon :app:testDebugUnitTest --tests 'com.samford.patient.integration.CrossAppPatientVerifyTest' \
             "-Psamford.e2eIn=${RUNNER_TEMP}/standin-handoff.json"
+          mkdir -p "${RUNNER_TEMP}/it-results/standin" && cp app/build/test-results/testDebugUnitTest/*.xml "${RUNNER_TEMP}/it-results/standin/"
       - name: Cross-app E2E with the real doctor tablet app (pinned commit)
         run: |
           git clone --quiet https://github.com/shivam098/samford-doctor-android.git "${RUNNER_TEMP}/doctor-app"
@@ -100,11 +103,13 @@ jobs:
           cat "${RUNNER_TEMP}/handoff.json"
           ./gradlew --no-daemon :app:testDebugUnitTest --tests 'com.samford.patient.integration.CrossAppPatientVerifyTest' \
             "-Psamford.e2eIn=${RUNNER_TEMP}/handoff.json"
+          mkdir -p "${RUNNER_TEMP}/it-results/doctor-app" && cp app/build/test-results/testDebugUnitTest/*.xml "${RUNNER_TEMP}/it-results/doctor-app/"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: integration-results
           path: |
+            ${{ runner.temp }}/it-results/
             app/build/test-results/
             ${{ runner.temp }}/samford.log
             ${{ runner.temp }}/handoff.json

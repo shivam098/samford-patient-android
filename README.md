@@ -22,6 +22,13 @@ has to be printed, carried or kept.
 All screenshots are in [docs/screenshots](docs/screenshots) (phone and small phone, English and
 Hindi, large text). Robolectric + Roborazzi tests generate them; they were reviewed by eye.
 
+On an Android 14 emulator in CI, signed in through the real mock backend (the prescription page is
+the one the doctor app wrote, unchanged):
+
+| Demo code | Home | Records | Doctor's handwritten prescription | Pinch-zoom (sample) |
+|---|---|---|---|---|
+| ![Demo code on the emulator](docs/screenshots/device/device-backend-01-demo-code.png) | ![Home on the emulator](docs/screenshots/device/device-backend-02-home.png) | ![Records on the emulator](docs/screenshots/device/device-backend-03-records.png) | ![Handwritten prescription on the emulator](docs/screenshots/device/device-backend-04-document.png) | ![Zoomed handwriting on the emulator](docs/screenshots/device/device-04-prescription-zoomed.png) |
+
 ## Install the test APK
 
 1. Download `samford-patient-v0.1.0.apk` and `samford-patient-v0.1.0.apk.sha256` from the
